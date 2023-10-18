@@ -2,6 +2,8 @@ import argparse
 
 
 
+
+
 def createTaskPlanner():
     tareas = {} # Inicializa un diccionario vacío para almacenar las tareas
     tarea_id = 0
@@ -66,9 +68,16 @@ def createTaskPlanner():
         prioridades_numericas = {
             "Alta": 1,
             "Media": 2,
-            "Baja": 3,}
+            "Baja": 3,
+            }
         order_by_priority = sorted(tareas.items(), key=lambda x: prioridades_numericas.get(x[1]["priority"], 0))
         return order_by_priority
+
+
+    def filterTaskByTag(tags):
+        filteredByTag = {tarea_id: task for tarea_id, task in tareas.items() if any(tag in task["tag"] for tag in tags)}
+        return filteredByTag
+
 
 
     return {
@@ -79,6 +88,7 @@ def createTaskPlanner():
         "tareas_no_completadas": getPendingTasks,
         "tareas_completadas": getCompletedTasks,
         "tareas_ordenadas_por_prioridad": getSortedTasksByPriority,
+        "tareas_filtradas_por_tags" : filterTaskByTag
     }
 
 
@@ -98,7 +108,8 @@ def main():
         print("5. Lista de Tareas no Completadas")
         print("6. Lista de Tareas Completadas")
         print("7. Tareas Ordenadas Por Prioridad")
-        print("8. Salir")
+        print("8. Filtrar tareas por Tags")
+        print("9. Salir")
 
         opcion = input("Escoge una accion a realizar: ")
 
@@ -141,6 +152,17 @@ def main():
             for tarea_id, tarea in order_by_priority:
                 print(f"ID: {tarea_id}, Nombre: {tarea['name']}, Prioridad: {tarea['priority']}, Completada: {tarea['completed']}")
         elif opcion == "8":
+            tags_input = input("Escribe las etiquetas de la tarea (separadas por comas o espacios): ")
+            # Divide la entrada en una lista de etiquetas
+            tags = [tag.strip().lower() for tag in tags_input.split(',') + tags_input.split()]  # Divide por comas o espacios 
+            filtered_by_tag = closure["tareas_filtradas_por_tags"](tags_input)
+            if not filtered_by_tag:
+                print("No Hay Tareas Con esa Tag")
+            else:
+                print("Tareas filtradas por etiqueta:")
+                for tarea_id, tarea in filtered_by_tag.items():
+                    print(f"ID: {tarea_id}, Nombre: {tarea['name']}, Etiqueta: {tarea['tag']}, Prioridad: {tarea['priority']}, Completada: {tarea['completed']}")
+        elif opcion == "9":
             print("\nHasta Luego")
             break
         else:
